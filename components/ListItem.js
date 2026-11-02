@@ -35,6 +35,17 @@ function Item({ item }) {
           />
         </View>
       </Pressable>
+      {item.image ? (
+        <Image
+          source={{ uri: item.image }}
+          style={{ width: 60, height: 60, borderRadius: 8 }}
+        />
+      ) : (
+        <Image
+          source={require("../assets/no-image.png")}
+          style={{ width: 60, height: 60, borderRadius: 8 }}
+        />
+      )}
       <Pressable
         style={styles.textContainer}
         onPress={() => navigation.navigate("EditWord", { wordData: item })}

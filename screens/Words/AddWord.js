@@ -9,14 +9,15 @@ import {
 import { useState, useEffect, useMemo } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { wordsLearningActions } from "../../store/wordsLearningSlice";
-
 import { getWordInfo } from "../../services/wordsHandler";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { playSound } from "../../services/soundHandler";
+import * as ImagePicker from "expo-image-picker";
 
 function AddWord({ navigation }) {
   const [text, setText] = useState();
   const [wordData, setWordData] = useState();
+  const [image, setImage] = useState(null);
   const colors = useSelector((state) => state.theme.colors);
   const styles = useMemo(() => getStyles(colors), [colors]);
   const dispatch = useDispatch();
@@ -44,13 +45,44 @@ function AddWord({ navigation }) {
   }, [navigation, wordData]);
 
   function onAdd() {
-    dispatch(wordsLearningActions.addWord(wordData));
+    dispatch(wordsLearningActions.addWord({ ...wordData, image }));
     navigation.navigate("AllWords");
   }
+
+  const pickImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.5,
+    });
+    if (!result.canceled) {
+      setImage(result.assets[0].uri);
+    }
+  };
 
   return (
     <>
       <View style={styles.inputContainer}>
+        <Pressable onPress={pickImage}>
+          {image ? (
+            <Image
+              style={{
+                width: 200,
+                height: 200,
+                alignSelf: "center",
+                marginVertical: 20,
+                borderRadius: 15,
+              }}
+              source={{ uri: image }}
+            />
+          ) : (
+            <View style={styles.noImagePressable}>
+              <Ionicons name="image-outline" size={120} color="white" />
+              <Text style={styles.label}>No image taken yet</Text>
+            </View>
+          )}
+        </Pressable>
         <Text style={styles.label}>Your word to search:</Text>
         <TextInput
           style={styles.input}
@@ -158,6 +190,17 @@ function getStyles(colors) {
     },
     playPressable: {
       marginHorizontal: 20,
+    },
+    noImagePressable: {
+      alignSelf: "center",
+      alignItems: "center",
+      marginVertical: 20,
+      paddingVertical: 20,
+      paddingHorizontal: 40,
+      borderWidth: 1,
+      borderColor: "white",
+      borderRadius: 8,
+      backgroundColor: "#746464",
     },
   });
 }

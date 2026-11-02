@@ -4,33 +4,65 @@ import {
   TextInput,
   Text,
   Pressable,
+  Image,
 } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { playSound } from "../../services/soundHandler";
 import { useState, useMemo } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { wordsLearningActions } from "../../store/wordsLearningSlice";
+import * as ImagePicker from "expo-image-picker";
 
 function EditWord({ route, navigation }) {
   const [wordData, setWordData] = useState(() => route.params.wordData);
+  const [image, setImage] = useState(() => route.params.wordData.image ?? null);
   const colors = useSelector((state) => state.theme.colors);
   const styles = useMemo(() => getStyles(colors), [colors]);
   const dispatch = useDispatch();
 
   function onSave() {
-    dispatch(wordsLearningActions.updateWord(wordData));
-    navigation.navigate(
-      "AllWords"
-    );
+    dispatch(wordsLearningActions.updateWord({ ...wordData, image }));
+    navigation.navigate("AllWords");
   }
 
   function onChangeWordData(text, propName) {
     setWordData((prevData) => ({ ...prevData, [propName]: text }));
   }
 
+  const pickImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.5,
+    });
+    if (!result.canceled) {
+      setImage(result.assets[0].uri);
+    }
+  };
+
   return (
     <>
       <View style={styles.receivedInfoContainer}>
+        <Pressable onPress={pickImage}>
+          {image ? (
+            <Image
+              style={{
+                width: 200,
+                height: 200,
+                alignSelf: "center",
+                marginVertical: 20,
+                borderRadius: 15,
+              }}
+              source={{ uri: image }}
+            />
+          ) : (
+            <View style={styles.noImagePressable}>
+              <Ionicons name="image-outline" size={120} color="white" />
+              <Text style={styles.label}>No image taken yet</Text>
+            </View>
+          )}
+        </Pressable>
         <View style={{ flexDirection: "row", alignItems: "baseline" }}>
           <Text style={styles.word}>{wordData.word}</Text>
           {wordData.audio && (
@@ -147,6 +179,17 @@ function getStyles(colors) {
     },
     playPressable: {
       marginHorizontal: 20,
+    },
+    noImagePressable: {
+      alignSelf: "center",
+      alignItems: "center",
+      marginVertical: 20,
+      paddingVertical: 20,
+      paddingHorizontal: 40,
+      borderWidth: 1,
+      borderColor: "white",
+      borderRadius: 8,
+      backgroundColor: "#746464",
     },
   });
 }
