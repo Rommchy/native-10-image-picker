@@ -27,7 +27,7 @@ function AllWords({ navigation }) {
       <View style={{ flex: 2 }}>
         <FlatList
           data={words}
-          renderItem={({ item }) => <Item item={item}/>}
+          renderItem={({ item }) => <Item item={item} />}
           keyExtractor={(item) => item.word}
           ListEmptyComponent={
             <View style={styles.empty}>

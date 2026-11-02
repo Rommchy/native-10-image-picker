@@ -12,6 +12,7 @@ import { useState, useMemo } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { wordsLearningActions } from "../../store/wordsLearningSlice";
 import * as ImagePicker from "expo-image-picker";
+import { pickImage } from "../../services/imageHandler";
 
 function EditWord({ route, navigation }) {
   const [wordData, setWordData] = useState(() => route.params.wordData);
@@ -29,22 +30,15 @@ function EditWord({ route, navigation }) {
     setWordData((prevData) => ({ ...prevData, [propName]: text }));
   }
 
-  const pickImage = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.5,
-    });
-    if (!result.canceled) {
-      setImage(result.assets[0].uri);
-    }
-  };
+  async function onPickImage() {
+    const uri = await pickImage();
+    if (uri) setImage(uri);
+  }
 
   return (
     <>
       <View style={styles.receivedInfoContainer}>
-        <Pressable onPress={pickImage}>
+        <Pressable onPress={onPickImage}>
           {image ? (
             <Image
               style={{

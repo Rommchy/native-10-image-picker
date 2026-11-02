@@ -12,7 +12,7 @@ import { wordsLearningActions } from "../../store/wordsLearningSlice";
 import { getWordInfo } from "../../services/wordsHandler";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { playSound } from "../../services/soundHandler";
-import * as ImagePicker from "expo-image-picker";
+import { pickImage } from "../../services/imageHandler";
 
 function AddWord({ navigation }) {
   const [text, setText] = useState();
@@ -49,22 +49,15 @@ function AddWord({ navigation }) {
     navigation.navigate("AllWords");
   }
 
-  const pickImage = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.5,
-    });
-    if (!result.canceled) {
-      setImage(result.assets[0].uri);
-    }
-  };
+  async function onPickImage() {
+    const uri = await pickImage();
+    if (uri) setImage(uri);
+  }
 
   return (
     <>
       <View style={styles.inputContainer}>
-        <Pressable onPress={pickImage}>
+        <Pressable onPress={onPickImage}>
           {image ? (
             <Image
               style={{
